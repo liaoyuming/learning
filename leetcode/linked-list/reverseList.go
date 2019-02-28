@@ -1,12 +1,8 @@
-package leetcode
+package main
 /**
 	反转一个单链表
 	leetcode : https://leetcode-cn.com/problems/reverse-linked-list/description/
  */
-type ListNode struct {
-	Val int
-	Next *ListNode
-}
 func reverseList(head *ListNode) *ListNode {
 	var reverseHead *ListNode
 
@@ -20,9 +16,9 @@ func reverseList(head *ListNode) *ListNode {
 }
 
 // @todo  使用递归
-func reverseList2(head *ListNode) *ListNode {
-
-}
+//func reverseList2(head *ListNode) *ListNode {
+//
+//}
 
 func main()  {
 	var head *ListNode

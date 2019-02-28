@@ -1,4 +1,4 @@
-package leetcode
+package main
 
 /**
 		不同路径 II

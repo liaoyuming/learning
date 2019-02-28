@@ -1,4 +1,4 @@
-package leetcode
+package main
 
 /**
 		反转链表 II
@@ -14,7 +14,7 @@ func main() {
 	}
 }
 
-func printList(l *ListNode)  {
+func PrintList(l *ListNode)  {
 	for l != nil {
 		println(l.Val)
 		l = l.Next

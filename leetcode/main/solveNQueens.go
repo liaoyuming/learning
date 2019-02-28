@@ -3,7 +3,7 @@
   	see https://leetcode-cn.com/problems/n-queens/description/
  */
 
-package leetcode
+package main
 
 import (
 	"fmt"

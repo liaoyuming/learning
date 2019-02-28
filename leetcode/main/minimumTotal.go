@@ -1,4 +1,4 @@
-package leetcode
+package main
 
 /**
 		三角形最小路径和

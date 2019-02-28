@@ -1,4 +1,4 @@
-package leetcode
+package main
 
 func main() {
 	println(maxProfit([]int{7,1,5,3,6,4}))

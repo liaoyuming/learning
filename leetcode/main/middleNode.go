@@ -1,4 +1,4 @@
-package leetcode
+package main
 
 /**
 		链表的中间结点
@@ -11,15 +11,16 @@ func main() {
 	l := middleNode(head)
 	printList(l)
 }
-
-func printList(l *ListNode)  {
-	for l != nil {
-		println(l.Val)
-		l = l.Next
-	}
-	println("###")
+func main() {
+	a := &ListNode{Val:2}
+	b := &ListNode{Val:3}
+	a.Next = b
+	b.Next = a
+	//head := &ListNode{Val: 2, Next:&ListNode{Val:2, Next:&ListNode{Val:2}}}
+	//head := &ListNode{}
+	l := detectCycle(a)
+	printList(l)
 }
-
 
 type ListNode struct {
 	Val int

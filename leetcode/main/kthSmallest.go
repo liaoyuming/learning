@@ -1,4 +1,4 @@
-package leetcode
+package main
 
 func main() {
 	root := TreeNode{4, &TreeNode{1, nil, nil}, &TreeNode{6, nil, nil}}

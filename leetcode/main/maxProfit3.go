@@ -1,4 +1,4 @@
-package leetcode
+package main
 /**
 		买卖股票的最佳时机 III
 		https://leetcode-cn.com/submissions/detail/10460321/

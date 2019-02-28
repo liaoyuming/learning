@@ -1,4 +1,4 @@
-package leetcode
+package main
 
 func main() {
 	//l1 := ListNode{Val: 1, Next:&(ListNode{Val: 2, Next:&(ListNode{Val: 1})})}

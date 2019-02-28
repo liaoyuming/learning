@@ -1,4 +1,4 @@
-package leetcode
+package main
 
 /**
 		回文链表
