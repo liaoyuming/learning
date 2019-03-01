@@ -12,7 +12,7 @@ type ListNode struct {
 
 func main() {
 	l1 := ListNode{Val: 4}
-	l2 := ListNode{Val: 2, Next:&(ListNode{Val: 9})}isPalindrome
+	l2 := ListNode{Val: 2, Next:&(ListNode{Val: 9})}
 	l := mergeTwoLists(&l1, &l2)
 	for l != nil {
 		println(l.Val)
