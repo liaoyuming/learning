@@ -17,15 +17,28 @@ func main() {
 	//fmt.Println((time.Now().UnixNano() - pre)/1000000)
 }
 
+//func insertionSort(arr []int) []int {
+//	for i:=1; i<len(arr); i++ {
+//		preIndex := i-1
+//		current := arr[i]
+//		for preIndex>=0 && arr[preIndex] > current {
+//			arr[preIndex+1] = arr[preIndex]
+//			preIndex--
+//		}
+//		arr[preIndex+1] = current
+//	}
+//	return arr
+//}
+
 func insertionSort(arr []int) []int {
 	for i:=1; i<len(arr); i++ {
-		preIndex := i-1
-		current := arr[i]
-		for preIndex>=0 && arr[preIndex] > current {
-			arr[preIndex+1] = arr[preIndex]
-			preIndex--
+		t := arr[i]
+		j := i-1
+		for j>=0 && arr[j] > t {
+			arr[j+1] = arr[j]
+			j--
 		}
-		arr[preIndex+1] = current
+		arr[j+1] = t
 	}
 	return arr
 }
