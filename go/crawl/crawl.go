@@ -24,27 +24,30 @@ func extractLinks(links *[]string, n *html.Node) {
 var tokens = make(chan struct{}, 30)
 
 func crawl(linkInfo *Link) []string {
-	err := linkInfo.UpdateURLByParent()
-	if err != nil || !linkInfo.hasValidUrl() {
+	if !linkInfo.HasValidUrl() {
 		return []string{}
 	}
 	if _, ok := linkFail.Load(linkInfo.url); ok {
 		return []string{}
 	}
-	log.Println("crawl:", linkInfo.url)
+	log.Println("crawl:", linkInfo.url, linkInfo.deep)
+
 	tokens <- struct{}{}
 	response, err := http.Get(linkInfo.url)
 	<- tokens
+
 	if err != nil {
 		linkFail.Store(linkInfo.url, true)
 		log.Println("http 请求失败", linkInfo.url, " parent Url:", linkInfo.parent.url)
 		return []string{}
 	}
 	defer response.Body.Close()
+
+
 	doc, err := html.Parse(response.Body)
 	if err != nil {
 		linkFail.Store(linkInfo.url, true)
-		log.Println("html 解析失败", response.Body)
+		log.Println("html 解析失败", response.Body, " Url:", linkInfo.url)
 		return []string{}
 	}
 	go handle(doc)
@@ -70,7 +73,7 @@ func initCrawl() {
 	flag.IntVar(&maxDeep, "deep", 3, "the depth of crawl")
 	flag.Parse()
 	link := NewLink(linkURL, nil)
-	if !link.hasValidUrl() {
+	if !link.HasValidUrl() {
 		log.Fatal("请输入正确的 url 参数")
 		return
 	}
@@ -79,11 +82,9 @@ func initCrawl() {
 
 func main() {
 	initCrawl()
-
-	count := 1
 	var linkInfo *Link
 
-	for ; count >0; count--{
+	for count:=1; count>0; count--{
 		list := <- worklist
 		for _, linkUrl := range list {
 			v, ok := linkSeen.Load(linkUrl)
@@ -98,10 +99,16 @@ func main() {
 				count++
 				go func(linkInfo *Link) {
 					urls := crawl(linkInfo)
+					list := []string{}
 					for _,l := range urls {
-						linkSeen.Store(l, NewLink(l, linkInfo))
+						t := NewLink(l, linkInfo)
+						t.UpdateURLByParent()
+						if _, ok := linkSeen.Load(t.url); !ok {
+							linkSeen.Store(t.url, t)
+							list = append(list, t.url)
+						}
 					}
-					worklist <- urls
+					worklist <- list
 				}(linkInfo)
 			}
 		}
