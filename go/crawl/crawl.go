@@ -4,106 +4,105 @@ import (
 	"golang.org/x/net/html"
 	"net/http"
 	"log"
-	"net/url"
 	"flag"
 	"sync"
 )
 
-func extractLinks(links []string, n *html.Node) []string {
+func extractLinks(links *[]string, n *html.Node) {
 	if n.Type == html.ElementNode && n.Data == "a" {
 		for _, a := range n.Attr {
 			if a.Key == "href" {
-				links = append(links, a.Val)
+				*links = append(*links, a.Val)
 			}
 		}
 	}
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		links = extractLinks(links, c)
+		extractLinks(links, c)
 	}
-	return links
 }
 
-func isURL(link string) bool {
-	u, err := url.Parse(link)
-	if err != nil {
-		log.Println("url parse error: ", err)
-		return false
-	}
-	return u.Scheme != "" && u.Host != ""
-}
+var tokens = make(chan struct{}, 30)
 
-var tokens = make(chan struct{}, 20)
-
-func crawl(link string) []string {
-	if !isURL(link) {
+func crawl(linkInfo *Link) []string {
+	err := linkInfo.UpdateURLByParent()
+	if err != nil || !linkInfo.hasValidUrl() {
 		return []string{}
 	}
-	log.Println("crawl:", link)
+	if _, ok := linkFail.Load(linkInfo.url); ok {
+		return []string{}
+	}
+	log.Println("crawl:", linkInfo.url)
 	tokens <- struct{}{}
-	response, err := http.Get(link)
+	response, err := http.Get(linkInfo.url)
 	<- tokens
 	if err != nil {
-		log.Println("http 请求失败", link)
+		linkFail.Store(linkInfo.url, true)
+		log.Println("http 请求失败", linkInfo.url, " parent Url:", linkInfo.parent.url)
 		return []string{}
 	}
 	defer response.Body.Close()
-	links := []string{}
 	doc, err := html.Parse(response.Body)
 	if err != nil {
+		linkFail.Store(linkInfo.url, true)
 		log.Println("html 解析失败", response.Body)
 		return []string{}
 	}
-	links = extractLinks(links, doc)
+	go handle(doc)
+	links := []string{}
+	extractLinks(&links, doc)
 	return links
 }
 
-type LinkInfo struct {
-	seen bool
-	deep int
+func handle(node *html.Node) {
+	// do something
 }
 
-func main() {
-	link := ""
-	maxDeep := 0
-	flag.StringVar(&link, "url", "", "the url that you want to crawl")
+var (
+	linkSeen = sync.Map{}  // 对已爬过的去重
+	linkFail = sync.Map{}  // 对爬取失败的去重
+	worklist = make(chan []string, 5)
+	maxDeep = 0
+)
+
+func initCrawl() {
+	linkURL := ""
+	flag.StringVar(&linkURL, "url", "", "the url that you want to crawl")
 	flag.IntVar(&maxDeep, "deep", 3, "the depth of crawl")
 	flag.Parse()
-	if !isURL(link) {
+	link := NewLink(linkURL, nil)
+	if !link.hasValidUrl() {
 		log.Fatal("请输入正确的 url 参数")
 		return
 	}
+	worklist <- []string{link.url}
+}
 
-	worklist := make(chan []string, 3)
-	worklist <- []string{link}
+func main() {
+	initCrawl()
 
 	count := 1
-	linkInfo := new(LinkInfo)
-
-	linkInfoSyncMap := sync.Map{}
+	var linkInfo *Link
 
 	for ; count >0; count--{
 		list := <- worklist
 		for _, linkUrl := range list {
-			v, ok := linkInfoSyncMap.Load(linkUrl)
+			v, ok := linkSeen.Load(linkUrl)
 			if !ok {
-				linkInfo = &LinkInfo{seen:false, deep:0}
-				linkInfoSyncMap.Store(linkUrl, linkInfo)
+				linkInfo = NewLink(linkUrl, nil)
+				linkSeen.Store(linkUrl, linkInfo)
 			} else {
-				linkInfo = v.(*LinkInfo)
+				linkInfo = v.(*Link)
 			}
 			if !linkInfo.seen && linkInfo.deep < maxDeep {
 				linkInfo.seen = true
 				count++
-				go func(url string, linkInfo *LinkInfo) {
-					urls := crawl(url)
+				go func(linkInfo *Link) {
+					urls := crawl(linkInfo)
 					for _,l := range urls {
-						linkInfoSyncMap.Store(l, &LinkInfo{
-							seen:false,
-							deep:linkInfo.deep+1,
-						})
+						linkSeen.Store(l, NewLink(l, linkInfo))
 					}
 					worklist <- urls
-				}(linkUrl, linkInfo)
+				}(linkInfo)
 			}
 		}
 	}
