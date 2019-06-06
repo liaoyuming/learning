@@ -11,7 +11,6 @@ func subsets(nums []int) [][]int {
 	for i:=0; i<len(sub); i++ {
 		t := append(sub[i][:len(sub[i]):len(sub[i])], nums[0])
 		res = append(res, t)
-		fmt.Println(res)
 	}
 	return res
 }
