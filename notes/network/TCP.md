@@ -146,6 +146,7 @@ Nagle算法的规则：
 
 ![滑动窗口](https://i.screenshot.net/nrnz0ak)
 
+##### 滑动窗口大小为 0 的情况
 滑动窗口大小为 0 时，发送端就不发数据了，但发送端会使用一个持续定时器 (persist timer)来周期性地 向接收方查询，以便发现窗口是否已增大。当 persist timer 到期时，TCP 发送方尝试恢复发送一个小的 ZWP 包（Zero Window Probe），期待接收方回复一个带着新的接收窗口大小的确认包。一般 ZWP 包会设置成3次，每次大约30-60 秒，如果3次过后还是0的话，有的 TCP 实现就会发 RST 把链接断了
 
 ##### 糊涂窗口综合症 Silly Window Syndrome
