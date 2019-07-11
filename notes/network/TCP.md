@@ -186,6 +186,8 @@ TCP 提供可靠的运输层。因此需要确认从另一端收到的数据。�
     - 慢启动算法初始设置 cwnd 为 1 个报文段，此后每收到一个确认就加 1 
     - 拥塞避免算法要求每次收到一个确认时将 cwnd = cwnd + 1/cwnd，每过一个 RTT 时，cwnd = cwnd + 1
 
+![慢启动](https://i.screenshot.net/74np4fd)
+
 ![慢启动和拥塞避免](https://i.screenshot.net/4e8d9bg)
 
 
@@ -197,6 +199,8 @@ TCP 提供可靠的运输层。因此需要确认从另一端收到的数据。�
 - 当收到第3个重复的 ACK 时，将 ssthresh 设置为当前拥塞窗口 cwnd 的一半。重传丢失的报文段。设置 cwnd 为 ssthresh 加上3倍的报文段大小
 - 每次收到另一个重复的 ACK 时，cwnd 增加 1 个报文段大小并发送 1 个分组(如果新的 cwnd 允许发送)。
 - 当下一个确认新数据的 ACK 到达时，设置 cwnd 为 ssthresh。这个 ACK 应该是在进行重传后的一个往返时间内对步骤1中重传的确认。另外，这个 ACK 也应该是对丢失的分组和收到的第1个重复的 ACK 之间的所有中间报文段的确认 
+
+![快速重传](https://i.screenshot.net/dnmgna6)
 
 ![快速重传和快速恢复](https://i.screenshot.net/ygj5mcw)
 
